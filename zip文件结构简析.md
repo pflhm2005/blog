@@ -139,8 +139,8 @@
 - disk number start/internal file attributes 默认为\x00\x00
 - external file attributes 平台相关的值
 - total number of ... 压缩的文件数/压缩的文件夹数
-- size of the central directory ... 文件夹内容长度
-- offset of start of ... 文件内容的长度偏移量
+- size of the central directory ... 文件夹头部总长度
+- offset of start of ... 文件头部+内容总长度
 
 按照如上的结构依次将数据整合，最后就可以生成一个zip文件了。
 ### 代码实现
