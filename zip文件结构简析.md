@@ -138,8 +138,8 @@
   低位 => 编码文件的软件版本 0x0014 => 14 => 1.4版本
 - disk number start/internal file attributes 默认为\x00\x00
 - external file attributes 平台相关的值
-- total number of ... 压缩的文件数
-- size of the central directory 压缩的文件夹数
+- total number of ... 压缩的文件数/压缩的文件夹数
+- size of the central directory ... 文件夹内容长度
 - offset of start of ... 文件内容的长度偏移量
 
 按照如上的结构依次将数据整合，最后就可以生成一个zip文件了。
