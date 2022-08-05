@@ -6,7 +6,7 @@
 
 这里需要重新申明一下，所有的工具插件核心原理其实都非常简单，复杂度都来源于兼容、多样化参数配置处理、功能解耦、代码预留等。这样可以让代码维护与合作开发变的简单，但是对于阅读源码学习的人来说就比较痛苦，毕竟我不关心每一个类都有什么作用。
 
-重写后的[代码]([https://github.com/pflhm2005/XLSX](https://github.com/pflhm2005/XLSX/blob/master/lib/dep/jszip/index.js))
+重写后的[代码]([https://github.com/pflhm2005/XLSX](https://github.com/pflhm2005/XLSX/blob/master/lib/dep/jszip/index.js)
 
 话不多说，开始。
 
