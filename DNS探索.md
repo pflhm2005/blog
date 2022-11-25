@@ -114,4 +114,65 @@ static void uv__getaddrinfo_work(struct uv__work* w) {
   req->retcode = uv__getaddrinfo_translate_error(err);
 }
 ```
-可以看出，libuv最终调用的是[GetAddrInfoW](https://learn.microsoft.com/en-us/windows/win32/api/ws2tcpip/nf-ws2tcpip-getaddrinfow)，这是一个win32api
+可以看出，libuv最终调用的是[GetAddrInfoW](https://learn.microsoft.com/en-us/windows/win32/api/ws2tcpip/nf-ws2tcpip-getaddrinfow)，这是一个win32api，来源于"ws2tcpip.h"，属于windows内部api，可以在winSDK里面找到，具体的实现就暂时不看了
+
+### Resolver
+
+这个类的声明在JS代码里，但是所有方法的实现都在C++，只看resolve4这个方法  
+首先来看一下类的定义
+```
+// lib/dns.js
+const { Resolver, resolveMap } = createResolverClass(resolver);
+function createResolverClass(resolver) {
+  const resolveMap = ObjectCreate(null);
+  class Resolver extends ResolverBase {}
+  Resolver.prototype.resolveAny = resolveMap.ANY = resolver('queryAny');
+  Resolver.prototype.resolve4 = resolveMap.A = resolver('queryA');
+  ...
+
+  return {
+    resolveMap,
+    Resolver
+  };
+}
+```
+这里的Resolver就是dns.Resolver，其中有一个写法还挺有意思，可以说是最简化的单例
+```
+function lazyBinding() {
+  binding ??= internalBinding('cares_wrap');
+  return binding;
+}
+```
+这里的??=是只有binding为null或undefined时才会对其赋值，所以只会赋值一次，后续的调用会直接返回  
+源码比较绕，这里直接看resolve4的实现
+```
+// 这里是个模板函数resolve4 => queryA => QueryAWrap => ATraits
+template <class Wrap>
+static void Query(const FunctionCallbackInfo<Value>& args) {
+  ...
+
+  auto wrap = std::make_unique<Wrap>(channel, req_wrap_obj);
+
+  node::Utf8Value name(env->isolate(), string);
+  channel->ModifyActivityQueryCount(1);
+  int err = wrap->Send(*name);
+  ...
+
+  args.GetReturnValue().Set(err); // 相当于JS代码的return err
+}
+```
+这里的核心就是Send方法，name就是我们传的域名
+```
+void AresQuery(const char* name, int dnsclass, int type) {
+  ...
+
+  ares_query(
+      channel_->cares_channel(),
+      name,
+      dnsclass,
+      type,
+      Callback,
+      MakeCallbackPointer());
+}
+```
+走的是方法ares_query，这个方法来源于外部依赖[c-ares](https://c-ares.org/)，一个异步的DNS工具
