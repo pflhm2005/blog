@@ -175,4 +175,10 @@ void AresQuery(const char* name, int dnsclass, int type) {
       MakeCallbackPointer());
 }
 ```
-走的是方法ares_query，这个方法来源于外部依赖[c-ares](https://c-ares.org/)，一个异步的DNS工具
+走的是方法ares_query，这个方法来源于外部依赖[c-ares](https://c-ares.org/)，一个异步的DNS工具  
+多嘴一句，这个方法所在文件名是cares_wrap，里面很多方法在node各处都能见到，之前一直搞不懂什么意思，看到这个工具名才明白是对第三方插件的封装，吐了啊……  
+简述一下工具内部实现，C++源码没啥好看的，看总结：
+1. 生成一个query对象来管理DNS请求，包含了uid、待请求域名、callback等属性
+2. 处理传入的DNS服务器IP，判断请求方式是否是tcp(未指定请求方式且size大于512强制为tcp)
+3. 调用winsock.h的socket函数发送DNS请求
+4. 处理返回结果
